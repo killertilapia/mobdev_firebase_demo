@@ -31,12 +31,15 @@ class HomePage extends StatelessWidget {
     );
 
     CollectionReference empCollection = _db.collection("employee");
+    // #1 with Firebase handling the Id generation
+    await empCollection.doc().set(carlModel.toFirebase());
+
+    // #1 with generated Id
     var docId = empCollection.doc().id;
     carlModel.id = docId;
-    // #1
     await empCollection.doc(docId).set(carlModel.toFirebase());
 
-    // // #2
+    // // #2 without await
     // empCollection.doc().set(carlModel.toFirebase())
     //   .then((value) => print('New Employee Added'))
     //   .catchError((error) => print('Failed to add employee'));
@@ -65,9 +68,18 @@ class HomePage extends StatelessWidget {
       ),
       body: Container(
         child: Center(
-            child: RaisedButton(
-              child: Text('Save Data to Firestore'),
-              onPressed: _retrieveFromFireStore,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                RaisedButton(
+                  child: Text('Send Data to Firestore'),
+                  onPressed: _saveDataToFireStore,
+                ),
+                RaisedButton(
+                  child: Text('Get Data from Firestore'),
+                  onPressed: _retrieveFromFireStore,
+                ),
+              ],
             )
         ),
       ),
