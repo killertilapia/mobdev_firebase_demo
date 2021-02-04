@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:baylo_karon/services/auth.dart';
+import 'package:baylo_karon/models/employee_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:baylo_karon/provider/auth_provider.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({this.onSignedOut});
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+
+  HomePage({this.onSignedOut});
+
   final VoidCallback onSignedOut;
 
   Future<void> _signOut(BuildContext context) async {
@@ -14,6 +19,36 @@ class HomePage extends StatelessWidget {
     } catch (e) {
       print(e);
     }
+  }
+
+  Future<void> _saveDataToFireStore() async{
+    EmployeeModel carlModel = EmployeeModel(
+      name: "Carl",
+      description: "Crush ng Innovuze",
+      title: "Senior Web Developer",
+      email: "ctanilon@innovuze.com",
+      baseSalaryPerHour: 200.00
+    );
+
+    CollectionReference empCollection = _db.collection("employee");
+    var docId = empCollection.doc().id;
+    carlModel.id = docId;
+    // #1
+    await empCollection.doc(docId).set(carlModel.toFirebase());
+
+    // // #2
+    // empCollection.doc().set(carlModel.toFirebase())
+    //   .then((value) => print('New Employee Added'))
+    //   .catchError((error) => print('Failed to add employee'));
+  }
+
+  Future<EmployeeModel> _retrieveFromFireStore() async{
+    CollectionReference empCollection = _db.collection("employee");
+    empCollection.where("email", isEqualTo: "ctanilon@innovuze.com").get()
+      .then((QuerySnapshot snapshot){
+        var result = EmployeeModel.fromFirebase(snapshot.docs.first.data());
+        print("${result.name} ${result.description}");
+    });
   }
 
   @override
@@ -29,7 +64,12 @@ class HomePage extends StatelessWidget {
         ],
       ),
       body: Container(
-        child: Center(child: Text('Welcome!', style: TextStyle(fontSize: 32.0))),
+        child: Center(
+            child: RaisedButton(
+              child: Text('Save Data to Firestore'),
+              onPressed: _retrieveFromFireStore,
+            )
+        ),
       ),
     );
   }
