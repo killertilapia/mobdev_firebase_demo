@@ -72,7 +72,16 @@ class HomePage extends StatelessWidget {
 
     var snapshot = await empCollection.get();
     List<EmployeeModel> all = snapshot.docs.map((doc) => EmployeeModel.fromFirebase(doc.data())).toList();
-    
+
+    return all;
+  }
+
+  Future<List<String>> _retrieveAllImagesFromFireStore() async{
+    CollectionReference imgCollection = _db.collection("images");
+
+    var snapshot = await imgCollection.get();
+    List<String> all = snapshot.docs.map((doc) => doc['url'].toString()).toList();
+
     return all;
   }
 
@@ -93,14 +102,24 @@ class HomePage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                CachedNetworkImage(
-                  imageUrl: "https://firebasestorage.googleapis.com/v0/b/baylo-karon.appspot.com/o/my_file_name.jpg?alt=media&token=57308486-193d-441c-bddb-9c68823717d1",
-                  placeholder: (context, url) => CircularProgressIndicator(),
-                  //errorWidget:
-                  imageBuilder: (context, imageProvider) => CircleAvatar(
-                    backgroundImage: imageProvider,
-                    radius: 90.0,
-                  ),
+                FutureBuilder<List<String>>(
+                  future: _retrieveAllImagesFromFireStore(),
+                  builder: (context, snapshot){
+                    if(snapshot.hasData){
+                      return CachedNetworkImage(
+                          imageUrl: snapshot.data[1],
+                          placeholder: (context, url) => CircularProgressIndicator(),
+                          imageBuilder: (context, imageProvider) => CircleAvatar(
+                              backgroundImage: imageProvider,
+                              radius: 90.0,
+                          )
+                      );
+                    } else if (snapshot.hasError) {
+                      return Text("${snapshot.error}");
+                    } else {
+                      return Text('Nothing');
+                    }
+                  }
                 ),
                 RaisedButton(
                   child: Text('Send Data to Firestore'),
