@@ -47,13 +47,33 @@ class HomePage extends StatelessWidget {
     //   .catchError((error) => print('Failed to add employee'));
   }
 
-  Future<EmployeeModel> _retrieveFromFireStore() async{
+  Future<EmployeeModel> _retrieveFromFireStore({String email = 'ctanilon@innovuze.com'}) async{
     CollectionReference empCollection = _db.collection("employee");
-    empCollection.where("email", isEqualTo: "ctanilon@innovuze.com").get()
-      .then((QuerySnapshot snapshot){
-        var result = EmployeeModel.fromFirebase(snapshot.docs.first.data());
-        print("${result.name} ${result.description}");
-    });
+
+    // promises example to query
+    // empCollection.where("email", isEqualTo: email).get()
+    //   .then((QuerySnapshot snapshot){
+    //     var result = EmployeeModel.fromFirebase(snapshot.docs.first.data());
+    //     print("${result.name} ${result.description}");
+    // });
+
+    // async-await example to query
+    QuerySnapshot snapshot = await empCollection.where("email", isEqualTo: email).get();
+    EmployeeModel emp = EmployeeModel.fromFirebase(snapshot.docs.first.data());
+
+    print("${emp.name}");
+
+    return emp;
+  }
+
+  // example to retrieve all
+  Future<List<EmployeeModel>> _retrieveAllFromFireStore() async{
+    CollectionReference empCollection = _db.collection("employee");
+
+    var snapshot = await empCollection.get();
+    List<EmployeeModel> all = snapshot.docs.map((doc) => EmployeeModel.fromFirebase(doc.data())).toList();
+    
+    return all;
   }
 
   @override
