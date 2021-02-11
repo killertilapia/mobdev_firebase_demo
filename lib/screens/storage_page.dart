@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 class StorageDemoPage extends StatefulWidget {
   @override
@@ -34,7 +35,7 @@ class _StorageDemoPageState extends State<StorageDemoPage> {
 
     try {
       resultList = await MultiImagePicker.pickImages(
-        maxImages: 300,
+        maxImages: 3,
         enableCamera: true,
         selectedAssets: images,
         cupertinoOptions: CupertinoOptions(takePhotoIcon: "chat"),
@@ -72,7 +73,8 @@ class _StorageDemoPageState extends State<StorageDemoPage> {
 
     try {
       resultList = await MultiImagePicker.pickImages(
-        maxImages: 300,
+        maxImages: 3,
+
       );
     } on Exception catch (e) {
       error = e.toString();
@@ -87,6 +89,27 @@ class _StorageDemoPageState extends State<StorageDemoPage> {
       images = resultList;
       if (error == null) _error = 'No Error Dectected';
     });
+
+    for(var imageFile in images){
+      String result = await saveImageToFirebase(imageFile);
+    }
+
+  }
+
+  Future<String> saveImageToFirebase(Asset asset) async {
+    //StorageReference ref = FirebaseStorage().ref().child("my_file_name.jpg");
+    StorageReference ref = FirebaseStorage().ref().child(asset.name);
+
+    StorageUploadTask uploadTask = ref.putData(
+        (await asset.getByteData()).buffer.asUint8List()
+    );
+
+    return await (await uploadTask.onComplete).ref.getDownloadURL();
+  }
+
+  Future saveImageURLToFirebase(String imagePath) async {
+    // save image path to firestore
+    // @todo
   }
 
   @override
@@ -101,7 +124,7 @@ class _StorageDemoPageState extends State<StorageDemoPage> {
             Center(child: Text('Error: $_error')),
             RaisedButton(
               child: Text("Pick images"),
-              onPressed: loadAssets,
+              onPressed: GetAssets,
             ),
             Expanded(
               child: buildGridView(),

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:baylo_karon/services/auth.dart';
 import 'package:baylo_karon/models/employee_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:baylo_karon/provider/auth_provider.dart';
 
 class HomePage extends StatelessWidget {
@@ -72,6 +73,15 @@ class HomePage extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                CachedNetworkImage(
+                  imageUrl: "https://firebasestorage.googleapis.com/v0/b/baylo-karon.appspot.com/o/my_file_name.jpg?alt=media&token=57308486-193d-441c-bddb-9c68823717d1",
+                  placeholder: (context, url) => CircularProgressIndicator(),
+                  //errorWidget:
+                  imageBuilder: (context, imageProvider) => CircleAvatar(
+                    backgroundImage: imageProvider,
+                    radius: 90.0,
+                  ),
+                ),
                 RaisedButton(
                   child: Text('Send Data to Firestore'),
                   onPressed: _saveDataToFireStore,
