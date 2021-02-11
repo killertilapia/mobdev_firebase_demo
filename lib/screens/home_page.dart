@@ -1,3 +1,4 @@
+import 'package:baylo_karon/screens/storage_page.dart';
 import 'package:flutter/material.dart';
 import 'package:baylo_karon/services/auth.dart';
 import 'package:baylo_karon/models/employee_model.dart';
@@ -79,6 +80,15 @@ class HomePage extends StatelessWidget {
                   child: Text('Get Data from Firestore'),
                   onPressed: _retrieveFromFireStore,
                 ),
+                RaisedButton(
+                  child: Text("Move to Storage Demo Page"),
+                  onPressed: (){
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => StorageDemoPage())
+                      );
+                  }
+                )
               ],
             )
         ),
